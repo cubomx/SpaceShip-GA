@@ -5,10 +5,10 @@ using UnityEngine;
 public class Module
 {
 
-    [SerializeField] private int _propulsors;
-    [SerializeField] private float _ignition; //
-    [SerializeField] private float _turbo; //Percentage
-    [SerializeField] private float _gas;
+    public int _propulsors;
+    public float _ignition; //
+    public float _turbo; //Percentage
+    public float _gas;
     
     private float _gasWeight = 2.0f;
     private float _baseWeight = 5.0f;

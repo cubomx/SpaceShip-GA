@@ -24,7 +24,7 @@ public class Rocket : MonoBehaviour
     public GameObject Fire;
 
     private List<GameObject> moduleObjs = new List<GameObject>();
-    [SerializeField] private List<Module> rocketModules = new List<Module>();
+    public List<Module> rocketModules = new List<Module>();
     private Rigidbody rocketBody;
 
     void Start()
@@ -121,11 +121,23 @@ public class Rocket : MonoBehaviour
         CreateModule( P, I, T, G );
     }
 
+    public void CreateCombinedModule( CrossOver crossOver ){
+        CreateModule( crossOver.propulsorNo, crossOver.ignitionTime, crossOver.turboPercentage, crossOver.gasCapacity );
+    }
+
     public void CreateModule( int propulsorNo, float ignitionTime, float turboPercentage, float gasCapacity){
         Module newModule = new Module( propulsorNo, ignitionTime, turboPercentage, 
                                         gasCapacity, modulesWeight, propulsorsWeight );
         //gameObject.AddComponent<Module>();
         rocketModules.Add( newModule );
         initialHeight = transform.position.y;
+    }
+
+    public void DestroySelf( ){
+        Destroy(this.gameObject);
+    }
+
+    public void ChangeActive( bool isActive ){
+        this.gameObject.SetActive( isActive );
     }
 }
