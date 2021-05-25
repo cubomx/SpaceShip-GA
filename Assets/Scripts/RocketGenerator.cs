@@ -17,11 +17,13 @@ public class RocketGenerator : MonoBehaviour
 
     private bool generatingNewPop = false;
 
+    private Util util;
+
     void Start()
     {
+        util = new Util( );
         rockets = new List<Rocket>( );
         for( int idx = 0; idx < quantityRockets.x; idx++){
-            
             for( int idz = 0; idz < quantityRockets.y; idz++){
                 rockets.Add ( generateRocket ( idx, idz ) );
             }
@@ -30,7 +32,7 @@ public class RocketGenerator : MonoBehaviour
 
     Rocket generateRocket ( int indexX, int indexZ ){
         Rocket rocket;
-        Vector3 pos = new Vector3(3.0f*(indexX - 1), 0.0f, 3.0f*(indexZ- 1));
+        Vector3 pos = new Vector3(3.0f*(indexX - 2), 0.0f, 3.0f*(indexZ- 2));
         GameObject rocketGO = Instantiate( RocketPrefab, pos, Quaternion.identity );
         
         rocket = rocketGO.GetComponent<Rocket>();
@@ -100,7 +102,7 @@ public class RocketGenerator : MonoBehaviour
         rocket = rocketGO.GetComponent<Rocket>();
         // get largest module number 
         int parentOneModuleNum = parentOne.rocketModules.Count, parentTwoModuleNum = parentTwo.rocketModules.Count;
-        int numModules = getBiggestValue( parentOneModuleNum, parentTwoModuleNum );
+        int numModules = util.getBiggestValue( parentOneModuleNum, parentTwoModuleNum );
         for ( int idx = 0; idx < numModules; idx++ ){
             Module parentOneModule = null, parentTwoModule = null;
             if ( idx < parentOneModuleNum){
@@ -124,10 +126,6 @@ public class RocketGenerator : MonoBehaviour
         return rocket;
     }
 
-    int getBiggestValue(int firstValue, int secondValue ){
-        if ( firstValue > secondValue ) return firstValue;
-        return secondValue;
-    }
 
     CrossOver getValuesFromModule (Module parentOneMod, Module parentTwoMod, bool mode ) {
         if ( parentOneMod == null ){
@@ -145,57 +143,41 @@ public class RocketGenerator : MonoBehaviour
     }
 
     CrossOver mutate(CrossOver cross, float ratio ){
-        cross.propulsorNo = (int) changeValue( (float) rangePropulsors[0],  (float) rangePropulsors[1], (float) cross.propulsorNo, ratio, istUpMutating() );
-        cross.ignitionTime = changeValue(rangeIgnition.x, rangeIgnition.y, cross.ignitionTime, ratio, istUpMutating( ) );
-        cross.turboPercentage = changeValue( rangeTurbo.x, rangeTurbo.y, cross.turboPercentage, ratio, istUpMutating( ) );
-        cross.gasCapacity = changeValue( rangeGas.x, rangeGas.y, cross.gasCapacity, ratio, istUpMutating( ) );
+        cross.propulsorNo = (int) util.changeValue( (float) rangePropulsors[0],  (float) rangePropulsors[1], (float) cross.propulsorNo, ratio, util.istUpMutating() );
+        cross.ignitionTime = util.changeValue(rangeIgnition.x, rangeIgnition.y, cross.ignitionTime, ratio, util.istUpMutating( ) );
+        cross.turboPercentage = util.changeValue( rangeTurbo.x, rangeTurbo.y, cross.turboPercentage, ratio, util.istUpMutating( ) );
+        cross.gasCapacity = util.changeValue( rangeGas.x, rangeGas.y, cross.gasCapacity, ratio, util.istUpMutating( ) );
         return cross;
     }
 
-    float changeValue(float min, float max, float value, float ratio, bool isToUp){
-        value *= (isToUp) ? (1.0f +ratio) : (1.0f - ratio) ;
-        if ( value > max ) value = max;
-        else if ( value < min ) value = min;
-        return value;
-    }
-    bool istUpMutating ( ){
-        float randomUpDown = Random.Range(0.0f, 10.0f);
-        if ( randomUpDown > 5.0f){
-            return true;
-        }
-        return false;
-    }
-
+    
     List<Rocket> crossover ( List<Rocket> rockets ){
         float x = -6, z = -6;
         List<Rocket> newPop = new List<Rocket>( );
         Vector2 pos = new Vector2(0.0f, 0.0f);
-        for( int idCouple = 0; idCouple < selectionQuantity / 2; idCouple++ ){
-            // create two sons per couple
-            Rocket parentOne =  rockets[ idCouple ];
-            Rocket parentTwo = rockets[idCouple + selectionQuantity / 2 ];
-            newPop.Add( combineGenes( parentOne, parentTwo, true, new Vector3 (x, 0.0f, z)  )  );
-            pos = changePosition( x, z );
-            x = pos.x;
-            z = pos.y;
-            newPop.Add( combineGenes( parentOne, parentTwo, false, new Vector3 (x, 0.0f, z)  ) );
-            pos = changePosition( x, z );
-            x = pos.x;
-            z = pos.y;
-            parentOne.DestroySelf( );
-            parentTwo.DestroySelf( );
+        for ( int iterations = 0; iterations < 2; iterations++ ){
+            rockets = util.Shuffle( rockets );
+            for( int idCouple = 0; idCouple < selectionQuantity / 2; idCouple++ ){
+                // create two sons per couple
+                Rocket parentOne =  rockets[ idCouple ];
+                Rocket parentTwo = rockets[idCouple + selectionQuantity / 2 ];
+                newPop.Add( combineGenes( parentOne, parentTwo, true, new Vector3 (x, 0.0f, z)  )  );
+                pos = util.changePosition( x, z );
+                x = pos.x;
+                z = pos.y;
+                newPop.Add( combineGenes( parentOne, parentTwo, false, new Vector3 (x, 0.0f, z)  ) );
+                pos = util.changePosition( x, z );
+                x = pos.x;
+                z = pos.y;
+                if ( iterations != 0){
+                    parentOne.DestroySelf( );
+                    parentTwo.DestroySelf( );
+                }
+            }
         }
+        
         return newPop;
     }
 
-    Vector2 changePosition (float x, float z){
-         if ( x >= 18.0f) {
-             x = -6.0f;
-             z += 3.0f;
-         }
-         else{
-             x += 3.0f;
-         } 
-         return new Vector2(x, z);
-    }
+    
 }
