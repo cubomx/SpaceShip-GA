@@ -14,8 +14,8 @@ public class Util {
     }
 
     public Vector2 changePosition (float x, float z){
-         if ( x >= 18.0f) {
-             x = -6.0f;
+         if ( x >= 30.0f) {
+             x = -30.0f;
              z += 3.0f;
          }
          else{
@@ -40,5 +40,11 @@ public class Util {
     public int getBiggestValue(int firstValue, int secondValue ){
         if ( firstValue > secondValue ) return firstValue;
         return secondValue;
+    }
+
+    public void deleteRockets( List<Rocket> rockets ){
+        for ( int idx = 0; idx < rockets.Count; idx++ ){
+            rockets[idx].DestroySelf( );
+        }
     }
 }

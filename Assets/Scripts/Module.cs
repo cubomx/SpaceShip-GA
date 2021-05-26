@@ -14,7 +14,7 @@ public class Module
     private float _baseWeight = 5.0f;
     private float _propulsorWeight = 1.0f;
     private float _turboBoost = 1.0f;
-    private float _maxGas;
+    public float _maxGas;
 
     public Module(int p, float i, float t, float g){
         _propulsors = p;

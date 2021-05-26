@@ -11,7 +11,7 @@ public class Rocket : MonoBehaviour
     [SerializeField] private float _flightTime = 0.0f;
     [SerializeField] private float _weight = 0.0f;
     [SerializeField] private float _trust = 0.0f;
-    public float forceMultiplier = 1000.0f;
+    public float forceMultiplier = 100.0f;
     public Material igniteColor;
     
     [Header("Weights")]
@@ -53,7 +53,6 @@ public class Rocket : MonoBehaviour
             _maxHeight = height;
         }
         else if ( height > initialHeight + 1.0f ){
-            Debug.Log("hiho");
             itFlew = true;
         }
        
@@ -116,8 +115,8 @@ public class Rocket : MonoBehaviour
     public void CreateRandomModule( int minPropulsors, int maxPropulsors, float minIgnition, float maxIgnition, float minTurbo, float maxTurbo, float minGas, float maxGas ){
         int P = Random.Range(minPropulsors, maxPropulsors);
         float I = Random.Range(minIgnition, maxIgnition);
-        float T = Random.Range(minTurbo, maxTurbo);
-        float G = Random.Range(minGas, maxGas);
+        float T = ( (int)Random.Range(minTurbo, maxTurbo)) * 10.0f;
+        float G = ( (int)Random.Range(minGas, maxGas))*200 +  1000.0f;
         CreateModule( P, I, T, G );
     }
 
