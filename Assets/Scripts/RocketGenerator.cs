@@ -20,6 +20,7 @@ public class RocketGenerator : MonoBehaviour
     private List<Rocket> rockets;
 
     private bool generatingNewPop = false;
+    private bool foundTheBest;
 
     private Util util;
 
@@ -56,26 +57,57 @@ public class RocketGenerator : MonoBehaviour
         if ( !generatingNewPop ){
 
                 if ( allRocketDone( rockets ) ) {
-                    generatingNewPop = true;
-                    Debug.Log("las sombras avanzan");
-                    rockets.Sort( SortByHeight );
-                    rockets = select( rockets );
-                    if ( rockets[0]._maxHeight > desireHeight ){
-                        Debug.Log("Found best :" +  rockets[0]._maxHeight  );
+
+                    if ( foundTheBest ){
+                        Debug.Log("Found best: " +  rockets[0]._maxHeight  );
+                        rockets[0] = GenerateTheBest( rockets[0] );
                     }
                     else{
-                        printFirstFive( rockets );
-                        rockets = crossover( rockets );
+                        generatingNewPop = true;
+                        Debug.Log("las sombras avanzan");
+                        rockets.Sort( SortByHeight );
+                        rockets = select( rockets );
+                        if ( rockets[0]._maxHeight > desireHeight ){
+                            
+                            foundTheBest = true;
+                            rockets = DeleteAllOther( rockets );
+                        }
+                        else{
+                            printFirstFive( rockets );
+                            rockets = crossover( rockets );
+                            
+                        }
                         generatingNewPop = false;
                     }
                     
+                    
             }
 
-
         }
-
-            
         
+        
+    }
+
+    List<Rocket> DeleteAllOther( List<Rocket> rockets ){
+        List<Rocket> rockets1 = new List<Rocket>( );
+        for ( int i = 1; i < rockets.Count; i++ ){
+            rockets[i].DestroySelf( );
+        }
+        rockets1.Add( rockets[0] );
+        return rockets1;
+    }
+
+    Rocket GenerateTheBest( Rocket bestRocket ){
+        Rocket rocket;
+        GameObject rocketGO = Instantiate( RocketPrefab, Vector3.zero, Quaternion.identity );
+        rocket = rocketGO.GetComponent<Rocket>();
+        for ( int i = 0; i < bestRocket.rocketModules.Count; i++ ){
+            Module module = bestRocket.rocketModules[i];
+            rocket.CreateModule( module._propulsors, 0.0f, module._turbo, module._maxGas );
+        }
+        rocket.GenerateModules( );
+        bestRocket.DestroySelf( );
+        return rocket;
     }
 
     void printFirstFive(List<Rocket> rockets ){
